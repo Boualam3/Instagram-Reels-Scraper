@@ -1,0 +1,37 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Virtual environment
+.venv/
+env/
+.env
+venv/
+
+# Playwright stuff
+playwright-report/
+test-results/
+
+# VS Code settings
+.vscode/
+
+# MacOS/Linux/Windows
+.DS_Store
+Thumbs.db
+
+# System logs or temp files
+*.log
+*.tmp
+
+# Session and Output
+insta_session.json
+output/
+data/
+
+# Python environment & IDE
+*.egg-info/
+.eggs/
+.idea/
