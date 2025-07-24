@@ -27,10 +27,12 @@ cd Instagram-Reels-Scraper
 ```
 
 ### 2. Install dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 You also need to install Playwright:
+
 ```bash
 playwright install
 ```
@@ -49,10 +51,9 @@ PASSWORD=your_instagram_password
 
 Interactive setup for scraping:
 
-bash
-
-
-`python main.py config` 
+```bash
+python main.py config
+``` 
 
 You'll be asked for:
 
@@ -73,8 +74,9 @@ You'll be asked for:
 
 Login using your `.env` credentials. The session is saved in `insta_session.json`.
 
-bash
-`python main.py login` 
+```bash
+python main.py login
+```
 
 ----------
 
@@ -82,8 +84,9 @@ bash
 
 Use saved session and configuration to collect reels data:
 
-bash
-`python main.py scrape` 
+```bash
+python main.py scrape
+```
 
 ----------
 
@@ -91,8 +94,9 @@ bash
 
 Convert saved JSON responses into a clean CSV file:
 
-bash
-`python main.py extract` 
+```bash
+python main.py extract
+```
 
 Optional flags:
 
@@ -107,15 +111,19 @@ Optional flags:
 
 Example:
 
-bash`python main.py extract -o top_reels.csv -sbp` 
+```bash
+python main.py extract -o top_reels.csv -sbp
+```
 
 ----------
 
 ## 📁 Output Example
-csv`url,plays,likes,engagement_rate
-instagram.com/reel/DAlZtOfyTip/,17.1M,592K,3.46%
-instagram.com/reel/DC689zIyrXq/,15.3M,1.1M,7.32%
-instagram.com/reel/DEVDHShS_uF/,14.3M,328K,2.29%` 
+```csv
+url,plays,likes,engagement_rate
+instagram.com/reel/DAlBtOfyTip/,17.1M,592K,3.46%
+instagram.com/reel/DC689zIdsXq/,15.3M,1.1M,7.32%
+instagram.com/reel/DEVDHShsffF/,14.3M,328K,2.29%
+``` 
 
 ----------
 
