@@ -1,5 +1,6 @@
 import argparse
 import asyncio
+import glob
 import json
 import os
 from dotenv import load_dotenv
@@ -19,6 +20,16 @@ def load_config():
     else:
         print("❌ Config not found. Please run `python main.py config` first.")
         exit(1)
+
+
+def load_credentials():
+    load_dotenv()
+    username = os.getenv("USERNAME")
+    password = os.getenv("PASSWORD")
+    if not username or not password:
+        print("❌ Please provide USERNAME and PASSWORD in .env")
+        exit(1)
+    return username, password
 
 
 def save_config(config):
@@ -61,9 +72,12 @@ def main():
 
     # Command: extract
     extract_parser = subparsers.add_parser("extract", help="Convert saved JSONs to summarized CSV")
+    config = load_config()
+    output_file = config.get('output_dir') + '.csv' if config.get('output_dir') else "reels_summary.csv" # noqa E501
+
     extract_parser.add_argument(
         "-o", "--output",
-        default="reels_summary.csv",
+        default=output_file,
         help="Output CSV filename"
     )
     extract_parser.add_argument(
@@ -82,6 +96,21 @@ def main():
         help="Sort output by engagement rate (%)"
     )
 
+    # Command: download
+    # Dynamically find latest CSV
+    csv_files = sorted(glob.glob("*.csv"), key=os.path.getmtime, reverse=True)
+    latest_csv = csv_files[0] if csv_files else "reels_summary.csv"
+    download_parser = subparsers.add_parser("download", help="Download reels from summary CSV")
+    download_parser.add_argument(
+        "-i", "--input",
+        default=latest_csv,
+        help=f"Input CSV file containing reel URLs [default: {latest_csv}]"
+    )
+    download_parser.add_argument(
+        "-o", "--output",
+        default="downloads",
+        help="Base output folder to save downloaded videos"
+    )
     args = parser.parse_args()
 
     if args.command == "config":
@@ -90,17 +119,13 @@ def main():
 
     elif args.command == "login":
         config = load_config()
-        load_dotenv()
-        username = os.getenv("USERNAME")
-        password = os.getenv("PASSWORD")
-        if not username or not password:
-            print("❌ Please provide USERNAME and PASSWORD in .env")
-            exit(1)
+        username, password = load_credentials()
         asyncio.run(login_instagram(username, password, headless=config.get("headless")))
 
     elif args.command == "scrape":
         config = load_config()
         if not Path("insta_session.json").exists():
+            username, password = load_credentials()
             asyncio.run(login_instagram(username, password, headless=config.get("headless")))
         asyncio.run(run_scraper(
             url=config["url"],
@@ -118,7 +143,7 @@ def main():
         output_csv = args.output 
         rows = load_all_data(output_dir)
         # write_csv(rows, output_csv)
-      
+    
         def sort_key(row):
             keys = []
             if args.sort_by_plays:
@@ -134,9 +159,26 @@ def main():
 
         write_csv(rows, output_csv)
 
+    elif args.command == "download":
+        from downloader import download_reels_from_csv
+        csv_path = Path(args.input)
+        output_base = Path(args.output)
+        #  downloads/{csv filename}/
+        output_dir = output_base / csv_path.stem
+        print(f"csv_path : {csv_path}")
+        print(f"output_base : {output_base}")
+        print(f"output_dir : {output_dir}")
+        download_reels_from_csv(
+            csv_path=csv_path,
+            output_folder=output_dir
+        )
     else:
         parser.print_help()
 
 
 if __name__ == "__main__":
-    main()
+    try:
+
+        main()
+    except KeyboardInterrupt:
+        print("Interrupted!!!")
