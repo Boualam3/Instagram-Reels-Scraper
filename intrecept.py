@@ -4,6 +4,8 @@ from datetime import datetime
 from pathlib import Path
 from playwright.async_api import async_playwright
 
+from utils import log
+
 response_count = 0
 
 
@@ -38,26 +40,26 @@ async def run_scraper(
             else None,
         )  # type: ignore
 
-        print(f"🔗 Navigating to: {url}")
+        log(f"🔗 Navigating to: {url}")
         await page.goto(url, wait_until="domcontentloaded")
 
         # ⚠️ Let Instagram initialize its data
         await asyncio.sleep(5)
 
-        print("📜 Scrolling and watching for requests...")
-        for i in range(scroll_count):
+        log("📜 Scrolling and watching for requests...")
+        for i in range(int(scroll_count)):
             await page.evaluate(
                 "window.scrollBy(0, document.body.scrollHeight)"
             )
-            print(f"↕️ Scrolled ({i+1}/{scroll_count})")
+            log(f"↕️ Scrolled ({i+1}/{scroll_count})")
             await asyncio.sleep(scroll_delay + 2)
             # ⏳ wait longer to let queries fire
 
-        print("✅ Done scrolling. Waiting for any final GraphQL responses...")
+        log("✅ Done scrolling. Waiting for any final GraphQL responses...")
         await asyncio.sleep(10)
 
         await browser.close()
-        print(f"💾 Total responses saved: {response_count}")
+        log(f"💾 Total responses saved: {response_count}")
 
 
 async def handle_response(response, output_dir):
@@ -70,6 +72,6 @@ async def handle_response(response, output_dir):
             with open(filename, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2)
             response_count += 1
-            print(f"📦 Saved: {filename.name}")
+            log(f"📦 Saved: {filename.name}")
     except Exception as e:
-        print(f"❌ Error saving response: {e}")
+        log(f"❌ Error saving response: {e}")
