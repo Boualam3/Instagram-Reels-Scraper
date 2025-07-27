@@ -45,7 +45,15 @@ USERNAME=your_instagram_username
 PASSWORD=your_instagram_password
 ```
 
-## 🚀 Usage
+## 🚀 Usage 
+# GUI
+Run the command and check the browser http://localhost:8080 
+
+```bash
+python gui.py
+``` 
+
+# CLI 
 
 ### 1. Configure
 
@@ -141,7 +149,4 @@ instagram.com/reel/DEVDHShsffF/,14.3M,328K,2.29%
 ## ✅ To-Do / Improvements
 
 -   Save scroll position to continue later
-    
--   Retry failed network requests
-    
--   GUI version (maybe)
+-   Improve Scraping and its Logs in GUI 
