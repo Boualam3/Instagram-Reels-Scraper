@@ -1,6 +1,6 @@
-import argparse
+import argparse # noqa : F401
 import asyncio
-import glob
+import glob # noqa : F401
 import json
 import os
 from dotenv import load_dotenv

@@ -5,6 +5,8 @@ from playwright.async_api import async_playwright
 from pathlib import Path
 from dotenv import load_dotenv
 
+from utils import log
+
 # Load environment variables from the .env file (if present)
 load_dotenv()
 
@@ -35,7 +37,7 @@ async def login_instagram(username=USERNAME, password=PASSWORD, headless=False):
         # 🔐 Click login
         await page.click("button[type='submit']")
 
-        print("✅ Logged in. Checking for 'Save Info' dialog...")
+        log("✅ Logged in. Checking for 'Save Info' dialog...")
         try:
 
             save_info_btn_xpath = '''
@@ -45,13 +47,13 @@ async def login_instagram(username=USERNAME, password=PASSWORD, headless=False):
 
             # await save_button.wait_for(state="visible", timeout=10000)
             await save_button.click()
-            print("💾 Clicked 'Save Info'")
+            log("💾 Clicked 'Save Info'")
 
         except Exception as e:
-            print(f"⚠️ 'Save Info' dialog not found. Proceeding...\nError: {e}")
+            log(f"⚠️ 'Save Info' dialog not found. Proceeding...\nError: {e}")
         # ✅ Save session
         session_data = await context.storage_state()
         Path(STORAGE_FILE).write_text(json.dumps(session_data))
-        print(f"✅ Session saved to {STORAGE_FILE}")
+        log(f"✅ Session saved to {STORAGE_FILE}")
 
         await browser.close()

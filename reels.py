@@ -1,5 +1,6 @@
 import json
 import csv
+from utils import log
 
 
 def format_number(count):
@@ -18,7 +19,7 @@ def extract_media_info(json_path):
                            .get("xdt_api__v1__clips__user__connection_v2", {}) \
                            .get("edges", [])
         except Exception as e:
-            print(f"Error parsing {json_path}: {e}")
+            log(f"Error parsing {json_path}: {e}")
             return []
 
     results = []
@@ -51,7 +52,7 @@ def write_csv(rows, output_file):
 
     rows.sort(key=lambda r: r.get("plays") or 0, reverse=True)
     if not rows:
-        print("No data to write.")
+        log("No data to write.")
         return
     formatted_rows = [
         {
@@ -65,7 +66,7 @@ def write_csv(rows, output_file):
         writer.writeheader()
         writer.writerows(formatted_rows)
 
-    print(f"[✓] Wrote {len(rows)} rows to {output_file}")
+    log(f"[✓] Wrote {len(rows)} rows to {output_file}")
 
 
 def sort_by(rows, csvfile):
