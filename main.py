@@ -13,13 +13,19 @@ CONFIG_FILE = Path(".scraper_config.json")
 
 
 def load_config():
-    if CONFIG_FILE.exists():
-        with open(CONFIG_FILE, "r") as f:
+    if not CONFIG_FILE.exists():
+        default = {
+        "url": "",
+        "output_dir": "",
+        "scroll_count": "",
+        "scroll_delay": "",
+        "headless": "",
+       }
+        save_config(default)
+    with open(CONFIG_FILE, "r") as f:
             return json.load(f)
 
-    else:
-        print("❌ Config not found. Please run `python main.py config` first.")
-        exit(1)
+
 
 
 def load_credentials():
@@ -168,10 +174,12 @@ def main():
         print(f"csv_path : {csv_path}")
         print(f"output_base : {output_base}")
         print(f"output_dir : {output_dir}")
-        download_reels_from_csv(
+        async def download():
+            await  download_reels_from_csv(
             csv_path=csv_path,
             output_folder=output_dir
         )
+        asyncio.run(download())
     else:
         parser.print_help()
 
