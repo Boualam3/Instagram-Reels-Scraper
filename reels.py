@@ -15,34 +15,45 @@ def extract_media_info(json_path):
     with open(json_path, encoding="utf-8") as f:
         try:
             content = json.load(f)
-            edges = content.get("data", {}) \
-                           .get("xdt_api__v1__clips__user__connection_v2", {}) \
-                           .get("edges", [])
         except Exception as e:
             log(f"Error parsing {json_path}: {e}")
             return []
 
     results = []
-    for edge in edges:
-        media = edge.get("node", {}).get("media", {})
+    # GraphQL files
+    if json_path.name.startswith("query_"):
+        edges = content.get("data", {}) \
+                       .get("xdt_api__v1__clips__user__connection_v2", {}) \
+                       .get("edges", [])
+        for edge in edges:
+            media = edge.get("node", {}).get("media", {})
+            results.append(parse_media_item(media))
 
-        reel_link = f"instagram.com/reel/{media.get('code')}/" if media.get("code") else ""
-        plays = media.get("play_count", 0)
-        likes = media.get("like_count", 0)
-        engagement = round((likes / plays * 100), 2) if plays else 0.0
-        results.append({
-            "url": reel_link ,
-            "plays": plays,
-            "likes": likes,
-            "engagement_rate": f"{engagement:.2f}%",
-        })
-
+    # RestAPI files
+    elif json_path.name.startswith("rest_"):
+        items = content.get("items", [])
+        for item in items:
+            media = item.get("media", item) 
+            results.append(parse_media_item(media))
     return results
+
+
+def parse_media_item(media):
+    reel_link = f"instagram.com/reel/{media.get('code')}/" if media.get("code") else ""
+    plays = media.get("play_count", 0)
+    likes = media.get("like_count", 0)
+    engagement = round((likes / plays * 100), 2) if plays else 0.0
+    return {
+        "url": reel_link,
+        "plays": plays,
+        "likes": likes,
+        "engagement_rate": f"{engagement:.2f}%",
+    }
 
 
 def load_all_data(data_dir):
     all_rows = []
-    for json_file in data_dir.glob("query_*.json"):
+    for json_file in data_dir.glob("*.json"):
         all_rows.extend(extract_media_info(json_file))
     return all_rows
 
