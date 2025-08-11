@@ -28,15 +28,20 @@ async def run_scraper(
         def is_graphql_response(res):
             return "graphql" in res.url and res.status == 200
 
-        def is_graphql_request(req):
-            return "graphql" in req.url
+        def is_relevant_response(res):
+            url = res.url
+            if is_graphql_response(res):
+                return True
+            return any(endpoint in url for endpoint in [
+                '/api/v1/clips/music'
+            ])
 
         page.on(
             "response",
             lambda response: asyncio.create_task(handle_response(
                 response, output_dir)
             )
-            if is_graphql_response(response)
+            if is_relevant_response(response)
             else None,
         )  # type: ignore
 
@@ -65,13 +70,18 @@ async def run_scraper(
 async def handle_response(response, output_dir):
     global response_count
     try:
-        if "graphql" in response.url and response.status == 200:
-            data = await response.json()
-            timestamp = int(datetime.now().timestamp() * 1000)
-            filename = output_dir / f"query_{timestamp}.json"
-            with open(filename, "w", encoding="utf-8") as f:
-                json.dump(data, f, indent=2)
-            response_count += 1
-            log(f"📦 Saved: {filename.name}")
+        if response.status != 200:
+            return
+        data = await response.json()
+        timestamp = int(datetime.now().timestamp() * 1000)
+        if "graphql" in response.url:
+            filename = output_dir / f"graphql_{timestamp}.json"
+        elif "clips/music" in response.url:
+            filename = output_dir / f"rest_{timestamp}.json"
+
+        with open(filename, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+        response_count += 1
+        log(f"📦 Saved: {filename.name}")
     except Exception as e:
         log(f"❌ Error saving response: {e}")
